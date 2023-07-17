@@ -25,14 +25,40 @@ const {test,expect} = require('@playwright/test');
 
 // });
 
-test.only('Client login test', async ({page}) => {
+test('Client login test', async ({page}) => {
+    const productName = 'zara coat 3';
+    const product = page.locator('.card-body b');
     await page.goto("https://rahulshettyacademy.com/client");
-    await page.locator("#userEmail").fill("anshika@gmail.com");
-    await page.locator("#userPassword").type("Iamking@000");
+    await page.locator("#userEmail").fill("shirusaran+test@gmail.com");
+    await page.locator("#userPassword").type("Test@123456");
     await page.locator("#login").click();
     await page.waitForLoadState('networkidle'); //when all the call are made and everything open on a page 
     const titles= await page.locator(".card-body b").allTextContents();
     console.log(titles);
 
+     //select product Zara coat 4
+    // const count = product.count(); // this count how many product we have on the array 
+    // for(let i = 0; i < count; ++i)
+    // {
+    //  if   (await product.nth(0).locator("b").textContent() === productName) 
+    //  {
+    //      // add product to Cart
+    //     await product.nth(i).locator("text= Add To Cart").click(); // you can ad locator base on the text
+    //     break;
+    //  }
 
+    // }  
+    //  await page.locator("[routerlink='/dashboard/cart']").click();
+    //  await page.locator("div li").first().waitFor({ state: 'visible' }); // this waits for item to show on the page at least the first one
+    await page.locator('.card-body b').first().waitFor({ state: 'visible' });
+
+  // Select and add the product to the cart
+  await page.click(`.card-body b:has-text("${productName}")`);
+  await page.click('button:text("Add To Cart")');
+
+//   // Go to the cart page and check if the product is added
+    await page.locator("[routerlink='/dashboard/cart']").click(); 
+    await page.locator("div li").first().waitFor({ state: 'visible' });
+     const bool = await page.locator("h3:has-text('zara coat 3')").isVisible(); // adding locator based on text checking visibility
+     expect(bool).toBeTruthy(); //assert it returns true
 });

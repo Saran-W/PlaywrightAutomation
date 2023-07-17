@@ -80,7 +80,7 @@ test('UI Controls', async ({page})=>
 });
 
 
-test.only('Child window handling', async ({browser})=>
+test('Child window handling', async ({browser})=>
 {
   let text;
     // clicking a link that opens in a new page 
