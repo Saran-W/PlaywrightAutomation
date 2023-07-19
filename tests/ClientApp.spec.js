@@ -26,10 +26,12 @@ const {test,expect} = require('@playwright/test');
 // });
 
 test('Client login test', async ({page}) => {
+    const email = "shirusaran+test@gmail.com";
     const productName = 'zara coat 3';
+    const emailLabel = page.locator('.user__name label');
     const product = page.locator('.card-body b');
     await page.goto("https://rahulshettyacademy.com/client");
-    await page.locator("#userEmail").fill("shirusaran+test@gmail.com");
+    await page.locator("#userEmail").fill(email);
     await page.locator("#userPassword").type("Test@123456");
     await page.locator("#login").click();
     await page.waitForLoadState('networkidle'); //when all the call are made and everything open on a page 
@@ -61,4 +63,44 @@ test('Client login test', async ({page}) => {
     await page.locator("div li").first().waitFor({ state: 'visible' });
      const bool = await page.locator("h3:has-text('zara coat 3')").isVisible(); // adding locator based on text checking visibility
      expect(bool).toBeTruthy(); //assert it returns true
+     await page.locator("text=Checkout").click();
+     await page.locator('[placeholder="Select Country"]').type("Ind",{delay:100}); //This slows down typing a letter at a time instead of pastin
+    const countryDropdown =  page.locator(".ta-results");
+    await countryDropdown.waitFor();
+    let optionsCount;
+   optionsCount = await countryDropdown.locator("button").count();
+   let text;
+   for(let i =0;i< optionsCount; ++i) 
+   {
+    text = await countryDropdown.locator("button").nth(i).textContent();
+    if (text === "Indonesia")// The text has to be the exact same here or else use trim
+    {
+      await countryDropdown.locator("button").nth(i).click();
+      break;
+    }
+   }
+   const emailText = await emailLabel.textContent();
+   await expect(emailText).toBe(email);
+   await page.locator(".action__submit").click();
+   const orderlable = page.locator(".hero-primary");
+   const message = await orderlable.textContent();
+   await expect(message).toBe(" Thankyou for the order. ");
+   const orderId = await page.locator(".em-spacer-1 .ng-star-inserted").textContent();
+   console.log(orderId);
+   await page.locator("button[routerlink*='myorder']").click();
+   await page.locator("tbody").waitFor(); //the wait ensures the page is open after the click
+   const row = await page.locator("tbody tr");
+
+  for (let i=0; i<await row.count(); ++i)
+  {
+    const rowOrderId = await row.nth(i).locator("th");
+    if(orderId.includes(rowOrderId))
+  {
+      await row.nth(i).locator("button"),first().click();
+      break;
+  }
+  }
+  //assert the order Id matcher on the view page 
+  const orderIdDetails = await page.locator(".col-text").textContent()
+  expect (orderId.includes(orderIdDetails)).toBeTruthy();
 });
